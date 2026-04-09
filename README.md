@@ -1,45 +1,171 @@
-# Tech Challenge FIAP - Fase 04
+# 📱 Tech Challenge FIAP — Plataforma de Blog Educacional
+### Aplicativo Mobile em React Native + Expo + TypeScript
 
-Aplicativo mobile em React Native para a plataforma de blogging educacional desenvolvida nas fases 2 e 3. O projeto consome a API em Node.js/Express da fase 2 e replica, no contexto mobile, os fluxos de leitura, autenticacao e administracao da plataforma.
+---
 
-## Objetivo da fase
+## 👥 Integrantes do Grupo
 
-Esta entrega atende ao desafio da FIAP de criar uma interface mobile robusta, intuitiva e eficiente para:
+| Nome | RM | E-mail |
+|------|------|--------|
+| Gabriel Silva Queiroz | RM367280 | gabrielsq@yahoo.com.br |
+| Daniela Moreira | RM366750 | dani-camargo@live.com |
+| Bruno Teixeira Santos | RM367221 | fabiotas9@gmail.com |
+| Fabio Tavares Santana | RM368685 | bruno.if@hotmail.com |
 
-- listar e buscar posts
-- ler posts completos
-- autenticar usuarios
-- permitir criacao e edicao de posts por professores
-- cadastrar e editar professores
-- cadastrar e editar alunos
-- listar professores e alunos em telas administrativas
-- oferecer um painel administrativo para professores
+---
 
-## Stack
+# 🎯 Objetivo do Projeto
 
-- Expo + React Native
+Este projeto foi desenvolvido como parte do **Tech Challenge – Fase 4 (Mobile Development) da FIAP**, com o objetivo de criar um **aplicativo mobile** para a plataforma de blogging educacional construída nas fases anteriores, onde:
+
+- **Alunos** podem listar, buscar e ler posts sem necessidade de login.
+- **Professores** podem criar, editar e excluir posts pelo app.
+- **Professores** também gerenciam cadastro de professores e alunos pelo painel administrativo.
+- O app consome diretamente a **API REST da Fase 2** (Node.js + Express + MongoDB Atlas).
+
+---
+
+# 🔗 Relação com as Fases Anteriores
+
+| Fase | Descrição |
+|------|-----------|
+| **Fase 2** | Backend REST em Node.js + Express + MongoDB Atlas |
+| **Fase 3** | Frontend web em React + Vite + TypeScript |
+| **Fase 4** | Cliente mobile em React Native reaproveitando contratos, regras de autenticação e domínio já construídos |
+
+---
+
+# 🏗 Arquitetura da Aplicação
+
+Tecnologias utilizadas:
+
+- React Native + Expo
 - TypeScript
 - React Navigation (native stack)
 - Axios
 - AsyncStorage
 - Zod
 
-## Relacao com as fases anteriores
+### 🔧 Diagrama Arquitetural Simplificado
 
-- `desafio-fiap-fase-2`: backend REST em Node.js + Express + MongoDB
-- `desafio-fiap-fase-3`: frontend web em React + Vite + TypeScript
-- `desafio-fiap-fase-4`: cliente mobile em React Native reaproveitando os contratos, regras de autenticacao e dominio ja construidos
+```
+Usuário (Android / iOS / Web)
+         ↓
+   App React Native (Expo)
+         ↓
+   Axios (cliente HTTP)
+         ↓
+   API REST — Fase 2 (Node.js + Express)
+         ↓
+   MongoDB Atlas (Cloud)
+```
 
-## Requisitos
+---
+
+# 🚀 Tecnologias Utilizadas
+
+- **Expo ~54** — plataforma de build e execução React Native
+- **React Native 0.81** + **React 19** — framework mobile
+- **TypeScript ~5.8** — tipagem estática
+- **React Navigation 7** — navegação em native stack
+- **Axios** — cliente HTTP com interceptadores de autenticação
+- **AsyncStorage** — persistência de sessão entre abertura do app
+- **Zod** — validação de formulários de login, posts e usuários
+
+---
+
+# 📦 Estrutura de Pastas
+
+```
+/
+|-- src/
+|   |-- components/   componentes visuais reutilizáveis
+|   |-- constants/    tokens de tema (cores, espaçamentos)
+|   |-- contexts/     autenticação e sessão (AuthContext)
+|   |-- navigation/   stack principal do app
+|   |-- screens/      telas do fluxo mobile
+|   |-- services/     cliente HTTP Axios e módulos de integração
+|   |-- types/        contratos TypeScript compartilhados
+|   |-- utils/        formatação de datas e tratamento de erro
+|
+|-- App.tsx
+|-- app.json
+|-- tsconfig.json
+|-- package.json
+|-- README.md
+```
+
+### 🖥 Telas implementadas
+
+| Arquivo | Descrição |
+|---------|-----------|
+| `HomeScreen.tsx` | Listagem e busca de posts |
+| `PostDetailScreen.tsx` | Leitura completa de um post |
+| `LoginScreen.tsx` | Autenticação de usuários |
+| `PostFormScreen.tsx` | Criação e edição de posts (professores) |
+| `AdminHomeScreen.tsx` | Painel administrativo (professores) |
+| `UsersListScreen.tsx` | Listagem de professores e alunos |
+| `UserFormScreen.tsx` | Cadastro e edição de usuários |
+
+---
+
+# 🔐 Autenticação e Autorização
+
+O projeto utiliza:
+
+- **JWT** para autenticação — token obtido via `POST /auth/login`
+- **Role-based access** para diferenciação de permissões
+- **AsyncStorage** para persistência do token entre sessões
+- Respostas `401` derrubam a sessão local automaticamente
+
+### Regras de Acesso
+
+- Alunos (`student`) — apenas visualização de posts
+- Professores (`teacher`) — criação, edição e exclusão de posts + painel administrativo completo
+- Telas administrativas exigem autenticação e papel `teacher`
+
+---
+
+# 📚 Endpoints Consumidos
+
+### Autenticação
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| POST | `/auth/login` | Autenticar e obter JWT |
+
+### Posts
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | `/posts` | Listar posts |
+| GET | `/posts/search?q=...` | Buscar posts por palavra-chave |
+| GET | `/posts/:id` | Ler post completo |
+| POST | `/posts` | Criar post (professor) |
+| PUT | `/posts/:id` | Editar post (professor) |
+| DELETE | `/posts/:id` | Excluir post (professor) |
+
+### Usuários
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| POST | `/users` | Cadastrar usuário (professor) |
+| GET | `/users` | Listar usuários com paginação |
+| GET | `/users/:id` | Buscar usuário por ID |
+| PUT | `/users/:id` | Editar usuário (professor) |
+| DELETE | `/users/:id` | Excluir usuário (professor) |
+
+---
+
+# ⚙ Requisitos
 
 - Node.js 20 ou superior
 - npm 10 ou superior
 - Expo CLI via `npx expo`
-- API da fase 2 rodando localmente ou publicada
+- API da Fase 2 rodando localmente ou publicada
 
-## Setup inicial
+---
 
-1. Instale as dependencias:
+# 🛠 Setup Inicial
+
+1. Instale as dependências:
 
 ```bash
 npm install
@@ -65,120 +191,66 @@ npm run start
 
 5. Abra no Android, iOS ou web a partir do menu do Expo.
 
-## Observacao importante sobre ambiente local
+---
 
-Se voce rodar em emulador Android, o app converte automaticamente `localhost` e `127.0.0.1` para `10.0.2.2`, facilitando o consumo da API local da fase 2.
+# 🌐 Variável de Ambiente
 
-## Scripts
+| Variável | Descrição |
+|----------|-----------|
+| `EXPO_PUBLIC_API_BASE_URL` | URL base da API REST da Fase 2 |
 
-- `npm run start`: inicia o Metro/Expo
-- `npm run android`: abre o app em Android
-- `npm run ios`: abre o app em iOS
-- `npm run web`: abre a versao web pelo Expo
-- `npm run typecheck`: valida o TypeScript sem emitir arquivos
-
-## Variavel de ambiente
-
-- `EXPO_PUBLIC_API_BASE_URL`: URL base da API REST da fase 2
-
-Exemplos:
+Exemplo local:
 
 ```env
 EXPO_PUBLIC_API_BASE_URL=http://localhost:3000
 ```
 
+Exemplo para produção:
+
 ```env
 EXPO_PUBLIC_API_BASE_URL=https://desafio-fiap-fase-2.onrender.com
 ```
 
-## Funcionalidades implementadas
+---
 
-### Area publica
+# 📋 Scripts Disponíveis
 
-- listagem de posts
-- busca por palavra-chave
-- leitura completa de posts
-- funcionamento sem login para consulta de conteudo
+- `npm run start` — inicia o Metro/Expo
+- `npm run android` — abre o app em Android
+- `npm run ios` — abre o app em iOS
+- `npm run web` — abre a versão web pelo Expo
+- `npm run typecheck` — valida o TypeScript sem emitir arquivos
 
-### Area autenticada
+---
 
-- login com qualquer usuario existente na API
-- diferenciacao de permissoes entre `teacher` e `student`
-- criacao e edicao de posts para professores
-- painel administrativo com visao de posts, professores e alunos
-- cadastro e edicao de professores
-- cadastro e edicao de alunos
-- listagem paginada no servidor para usuarios
-- exclusao de professores e alunos pela area administrativa
+# 🤖 Observação sobre Emulador Android
 
-## Regras de acesso
+Se você rodar em emulador Android, o app converte automaticamente `localhost` e `127.0.0.1` para `10.0.2.2`, facilitando o consumo da API local da Fase 2 sem configuração adicional.
 
-- professores podem criar e editar posts
-- alunos permanecem em modo leitura
-- telas administrativas exigem autenticacao e papel `teacher`
-- o token JWT e persistido no `AsyncStorage`
-- respostas `401` derrubam a sessao local automaticamente
+---
 
-## Arquitetura da aplicacao
+# 🗺 Guia de Uso
 
-Estrutura principal:
+1. Acesse a **Home** para listar e buscar posts sem necessidade de login.
+2. Toque em um card para ler o conteúdo completo do post.
+3. Faça login como **professor** para liberar as áreas protegidas.
+4. No painel administrativo, crie posts e navegue para a gestão de professores e alunos.
+5. Use as telas de cadastro e edição para manter os usuários atualizados.
 
-```text
-src/
-  components/   componentes visuais reutilizaveis
-  constants/    tokens de tema
-  contexts/     autenticacao e sessao
-  navigation/   stack principal do app
-  screens/      telas do fluxo mobile
-  services/     cliente HTTP e modulos de integracao
-  types/        contratos TypeScript compartilhados
-  utils/        datas e tratamento de erro
-```
+---
 
-### Decisoes de implementacao
+# 🧾 Conclusão
 
-- `AuthContext` centraliza sessao, token e papel do usuario
-- `Axios` encapsula headers, base URL e tratamento de `401`
-- `React Navigation` organiza os fluxos mobile
-- `Zod` valida formularios de login, posts e usuarios
-- `AsyncStorage` persiste a sessao entre aberturas do app
+O projeto implementa um aplicativo mobile completo com:
 
-## Endpoints consumidos
+- React Native + Expo
+- TypeScript com contratos compartilhados
+- Autenticação JWT com persistência de sessão
+- Controle de permissões por papel (professor / aluno)
+- Integração total com a API REST da Fase 2
+- Gerenciamento completo de posts e usuários
+- Navegação estruturada com React Navigation
+- Validação de formulários com Zod
+- Reaproveitamento de domínio e contratos das fases anteriores
 
-### Autenticacao
-
-- `POST /auth/login`
-
-### Posts
-
-- `GET /posts`
-- `GET /posts/search?q=...`
-- `GET /posts/:id`
-- `POST /posts`
-- `PUT /posts/:id`
-- `DELETE /posts/:id`
-
-### Usuarios
-
-- `POST /users`
-- `GET /users`
-- `GET /users/:id`
-- `PUT /users/:id`
-- `DELETE /users/:id`
-
-## Guia de uso
-
-1. Abra a Home para listar e buscar posts.
-2. Toque em um card para ler o conteudo completo.
-3. Entre com um usuario `teacher` para liberar o painel administrativo.
-4. No painel, crie posts e navegue para a gestao de professores e alunos.
-5. Use as telas de cadastro e edicao para manter os usuarios.
-
-## Entrega tecnica sugerida
-
-Para a apresentacao em video e documentacao final da FIAP, vale destacar:
-
-- reaproveitamento de contratos e regras das fases 2 e 3
-- estrategia de persistencia de sessao mobile
-- tratamento das restricoes reais do backend no UX do app
-- modularizacao entre telas, servicos e contexto de autenticacao
+Alinhado às boas práticas do mercado e aos requisitos do **Tech Challenge FIAP — Fase 4**.
