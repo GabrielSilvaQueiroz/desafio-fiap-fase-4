@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "SystemConnect Mobile",
+    "slug": "desafio-fiap-fase-4",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "jsEngine": "hermes",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "android": {
+      "package": "com.fiap.desafiofase4"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.fiap.desafiofase4"
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
