@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -18,16 +18,22 @@ import { getErrorMessage } from '../utils/error';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
+const PAGE_SIZE = 5;
+
 export default function HomeScreen({ navigation }: Props) {
   const { user, isAuthenticated, isTeacher, logout } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(search), 350);
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 350);
     return () => clearTimeout(timer);
   }, [search]);
 
@@ -38,6 +44,7 @@ export default function HomeScreen({ navigation }: Props) {
     try {
       const response = await listPosts(query);
       setPosts(response);
+      setPage(1);
     } catch (currentError) {
       setError(getErrorMessage(currentError, 'Não foi possível carregar as publicações.'));
     } finally {
@@ -50,6 +57,15 @@ export default function HomeScreen({ navigation }: Props) {
       void loadPosts(debouncedSearch);
     }, [debouncedSearch, loadPosts])
   );
+
+  const totalPages = useMemo(() => Math.max(1, Math.ceil(posts.length / PAGE_SIZE)), [posts.length]);
+  const safePage = Math.min(page, totalPages);
+  const pagePosts = useMemo(
+    () => posts.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE),
+    [posts, safePage]
+  );
+  const from = posts.length === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1;
+  const to = Math.min(safePage * PAGE_SIZE, posts.length);
 
   return (
     <Screen
@@ -95,12 +111,6 @@ export default function HomeScreen({ navigation }: Props) {
           autoCapitalize="none"
           returnKeyType="search"
         />
-        <View style={styles.metaRow}>
-          <View style={styles.metaPill}>
-            <Text style={styles.metaPillValue}>{posts.length}</Text>
-            <Text style={styles.metaPillLabel}>{debouncedSearch ? 'resultados' : 'publicações'}</Text>
-          </View>
-        </View>
       </View>
 
       {isTeacher ? (
@@ -147,13 +157,40 @@ export default function HomeScreen({ navigation }: Props) {
             {debouncedSearch ? 'Resultados da Busca' : 'Posts Recentes'}
           </Text>
           <View style={styles.list}>
-            {posts.map((post) => (
+            {pagePosts.map((post) => (
               <PostCard
                 key={post._id}
                 post={post}
                 onPress={() => navigation.navigate('PostDetail', { postId: post._id })}
               />
             ))}
+          </View>
+          <View style={styles.pagination}>
+            <Text style={styles.paginationLabel}>
+              Exibindo {from}–{to} de {posts.length} {posts.length !== 1 ? 'publicações' : 'publicação'}
+            </Text>
+            {totalPages > 1 ? (
+              <View style={styles.paginationActions}>
+                <AppButton
+                  title="Anterior"
+                  variant="ghost"
+                  size="sm"
+                  disabled={safePage <= 1}
+                  onPress={() => setPage((p) => Math.max(1, p - 1))}
+                  style={styles.paginationBtn}
+                  textStyle={styles.paginationBtnText}
+                />
+                <AppButton
+                  title="Próxima"
+                  variant="ghost"
+                  size="sm"
+                  disabled={safePage >= totalPages}
+                  onPress={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  style={styles.paginationBtn}
+                  textStyle={styles.paginationBtnText}
+                />
+              </View>
+            ) : null}
           </View>
         </View>
       ) : null}
@@ -188,30 +225,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
   },
-  metaRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  metaPill: {
-    backgroundColor: 'rgba(248, 243, 235, 0.08)',
-    borderColor: 'rgba(248, 243, 235, 0.14)',
-    borderRadius: radius.md,
-    borderWidth: 1,
-    flex: 1,
-    gap: 2,
-    padding: spacing.md,
-  },
-  metaPillValue: {
-    color: colors.textOnDark,
-    fontSize: 17,
-    fontWeight: '800',
-  },
-  metaPillLabel: {
-    color: 'rgba(248, 243, 235, 0.72)',
-    fontSize: 12,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-  },
   actionsRow: {
     flexDirection: 'row',
     gap: spacing.sm,
@@ -236,5 +249,25 @@ const styles = StyleSheet.create({
   },
   list: {
     gap: spacing.md,
+  },
+  pagination: {
+    gap: spacing.sm,
+    paddingTop: spacing.xs,
+  },
+  paginationLabel: {
+    color: 'rgba(248, 243, 235, 0.72)',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  paginationActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  paginationBtn: {
+    backgroundColor: 'rgba(248, 243, 235, 0.08)',
+    borderColor: 'rgba(248, 243, 235, 0.18)',
+  },
+  paginationBtnText: {
+    color: colors.textOnDark,
   },
 });

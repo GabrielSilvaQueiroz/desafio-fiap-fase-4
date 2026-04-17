@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
+import { Ionicons } from '@expo/vector-icons';
 import AppButton from '../components/AppButton';
 import EmptyState from '../components/EmptyState';
 import LoadingState from '../components/LoadingState';
@@ -101,7 +102,10 @@ export default function PostDetailScreen({ navigation, route }: Props) {
       <View style={[styles.articleCard, shadow(2)]}>
         <Text style={styles.title}>{post.title}</Text>
         <View style={styles.metaBlock}>
-          <Text style={styles.metaText}>Por {post.author_name}</Text>
+          <View style={styles.authorBadge}>
+            <Ionicons name="person" size={11} color={colors.accent} />
+            <Text style={styles.authorBadgeText}>Professor {post.author_name}</Text>
+          </View>
           <Text style={styles.metaText}>
             Atualizado em {formatDateLabel(getEntityTimestamp(post))}
           </Text>
@@ -147,12 +151,29 @@ const styles = StyleSheet.create({
     lineHeight: 36,
   },
   metaBlock: {
-    gap: spacing.xs,
+    gap: spacing.sm,
+  },
+  authorBadge: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(15, 45, 92, 0.08)',
+    borderColor: 'rgba(15, 45, 92, 0.18)',
+    borderRadius: 999,
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+  },
+  authorBadgeText: {
+    color: colors.accent,
+    fontSize: 12,
+    fontWeight: '700',
   },
   metaText: {
-    color: colors.primaryDark,
+    color: colors.textMuted,
     fontSize: 13,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   content: {
     color: colors.text,
