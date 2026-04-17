@@ -9,8 +9,8 @@
 |------|------|--------|
 | Gabriel Silva Queiroz | RM367280 | gabrielsq@yahoo.com.br |
 | Daniela Moreira | RM366750 | dani-camargo@live.com |
-| Bruno Teixeira Santos | RM367221 | fabiotas9@gmail.com |
-| Fabio Tavares Santana | RM368685 | bruno.if@hotmail.com |
+| Bruno Teixeira Santos | RM367221 | bruno.if@hotmail.com |
+| Fabio Tavares Santana | RM368685 | fabiotas9@gmail.com |
 
 ---
 
