@@ -96,11 +96,10 @@ export default function PostFormScreen({ navigation, route }: Props) {
 
   if (!isAuthenticated) {
     return (
-      <Screen>
+      <Screen onBack={() => navigation.goBack()}>
         <SectionHeader
           title="Editor"
           subtitle="Faça login para continuar."
-          onBack={() => navigation.goBack()}
         />
         <EmptyState
           title="Login necessário"
@@ -114,11 +113,10 @@ export default function PostFormScreen({ navigation, route }: Props) {
 
   if (!isTeacher) {
     return (
-      <Screen>
+      <Screen onBack={() => navigation.goBack()}>
         <SectionHeader
           title="Editor"
           subtitle="Esta área não está disponível para a sua conta."
-          onBack={() => navigation.goBack()}
         />
         <EmptyState
           title="Acesso restrito"
@@ -131,12 +129,11 @@ export default function PostFormScreen({ navigation, route }: Props) {
   }
 
   return (
-    <Screen>
+    <Screen onBack={() => navigation.goBack()}>
       <SectionHeader
-        eyebrow={mode === 'edit' ? 'Edição' : 'Novo   Conteúdo'}
+        eyebrow={mode === 'edit' ? 'Edição' : 'Novo Conteúdo'}
         title={mode === 'edit' ? 'Editar Publicação' : 'Criar Publicação'}
         subtitle="Preencha os campos abaixo para salvar seu conteúdo."
-        onBack={() => navigation.goBack()}
       />
 
       <View style={[styles.card, shadow(2)]}>

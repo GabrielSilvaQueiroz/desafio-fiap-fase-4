@@ -2,13 +2,13 @@ import type { ViewStyle } from 'react-native';
 
 export const colors = {
   background: '#0B1420',
-  surface: '#132235',
-  surfaceAlt: '#1B324B',
+  surface: '#0F1E3C',
+  surfaceAlt: '#172D58',
   card: '#FAF7F1',
   cardMuted: '#EEE7DA',
   primary: '#CC6D1E',
   primaryDark: '#8F4511',
-  accent: '#2F617F',
+  accent: '#0F2D5C',
   success: '#2E7D5B',
   warning: '#B7791F',
   danger: '#B8404A',

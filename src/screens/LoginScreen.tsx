@@ -66,12 +66,11 @@ export default function LoginScreen({ navigation }: Props) {
   };
 
   return (
-    <Screen>
+    <Screen onBack={() => navigation.goBack()}>
       <SectionHeader
         eyebrow="Acesso"
         title="Entrar"
         subtitle="Acesse sua conta para continuar."
-        onBack={() => navigation.goBack()}
       />
 
       {isAuthenticated ? (
@@ -113,7 +112,6 @@ export default function LoginScreen({ navigation }: Props) {
           {submitError ? <Text style={styles.error}>{submitError}</Text> : null}
           <View style={styles.actions}>
             <AppButton title="Entrar" loading={loading} onPress={() => void handleSubmit()} />
-            <AppButton title="Voltar" variant="ghost" onPress={() => navigation.goBack()} />
           </View>
         </View>
       )}

@@ -91,11 +91,10 @@ export default function AdminHomeScreen({ navigation }: Props) {
 
   if (!isAuthenticated) {
     return (
-      <Screen>
+      <Screen onBack={() => navigation.goBack()}>
         <SectionHeader
           title="Painel"
           subtitle="Faça login para continuar."
-          onBack={() => navigation.goBack()}
         />
         <EmptyState
           title="Login necessário"
@@ -109,11 +108,10 @@ export default function AdminHomeScreen({ navigation }: Props) {
 
   if (!isTeacher) {
     return (
-      <Screen>
+      <Screen onBack={() => navigation.goBack()}>
         <SectionHeader
           title="Painel"
           subtitle="Esta área não está disponível para a sua conta."
-          onBack={() => navigation.goBack()}
         />
         <EmptyState
           title="Acesso restrito"
@@ -126,22 +124,23 @@ export default function AdminHomeScreen({ navigation }: Props) {
   }
 
   return (
-    <Screen>
+    <Screen
+      onBack={() => navigation.goBack()}
+      headerAction={
+        <AppButton
+          title="Atualizar"
+          size="sm"
+          variant="ghost"
+          onPress={() => void loadDashboard()}
+          style={styles.darkGhostButton}
+          textStyle={styles.darkGhostButtonText}
+        />
+      }
+    >
       <SectionHeader
         eyebrow="Gestão"
         title="Painel"
         subtitle="Acompanhe publicações e acessos em um só lugar."
-        onBack={() => navigation.goBack()}
-        action={
-          <AppButton
-            title="Atualizar"
-            size="sm"
-            variant="ghost"
-            onPress={() => void loadDashboard()}
-            style={styles.darkGhostButton}
-            textStyle={styles.darkGhostButtonText}
-          />
-        }
       />
 
       {refreshError ? (

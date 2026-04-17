@@ -96,11 +96,10 @@ export default function UsersListScreen({ navigation, route }: Props) {
 
   if (!isAuthenticated) {
     return (
-      <Screen>
+      <Screen onBack={() => navigation.goBack()}>
         <SectionHeader
           title={`Listagem de ${roleLabel}`}
           subtitle="Faça login para continuar."
-          onBack={() => navigation.goBack()}
         />
         <EmptyState
           title="Login necessário"
@@ -114,11 +113,10 @@ export default function UsersListScreen({ navigation, route }: Props) {
 
   if (!isTeacher) {
     return (
-      <Screen>
+      <Screen onBack={() => navigation.goBack()}>
         <SectionHeader
           title={`Listagem de ${roleLabel}`}
           subtitle="Esta área não está disponível para a sua conta."
-          onBack={() => navigation.goBack()}
         />
         <EmptyState
           title="Acesso restrito"
@@ -131,19 +129,20 @@ export default function UsersListScreen({ navigation, route }: Props) {
   }
 
   return (
-    <Screen>
+    <Screen
+      onBack={() => navigation.goBack()}
+      headerAction={
+        <AppButton
+          title={`Novo ${roleLabelSingular}`}
+          size="sm"
+          onPress={() => navigation.navigate('UserForm', { mode: 'create', role })}
+        />
+      }
+    >
       <SectionHeader
         eyebrow="Cadastros"
         title={`Listagem de ${roleLabel}`}
         subtitle="Visualize, edite e mantenha os registros atualizados."
-        onBack={() => navigation.goBack()}
-        action={
-          <AppButton
-            title={`Novo ${roleLabelSingular}`}
-            size="sm"
-            onPress={() => navigation.navigate('UserForm', { mode: 'create', role })}
-          />
-        }
       />
 
       {error ? (

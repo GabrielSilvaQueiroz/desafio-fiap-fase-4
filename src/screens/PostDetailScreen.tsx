@@ -76,11 +76,10 @@ export default function PostDetailScreen({ navigation, route }: Props) {
 
   if (!post || error) {
     return (
-      <Screen>
+      <Screen onBack={() => navigation.goBack()}>
         <SectionHeader
           title="Leitura"
           subtitle="Detalhes da publicação selecionada."
-          onBack={() => navigation.goBack()}
         />
         <EmptyState
           title="Conteúdo indisponível"
@@ -93,11 +92,10 @@ export default function PostDetailScreen({ navigation, route }: Props) {
   }
 
   return (
-    <Screen>
+    <Screen onBack={() => navigation.goBack()}>
       <SectionHeader
         title="Leitura"
         subtitle="Conteúdo completo da publicação."
-        onBack={() => navigation.goBack()}
       />
 
       <View style={[styles.articleCard, shadow(2)]}>

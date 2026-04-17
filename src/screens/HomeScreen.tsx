@@ -52,31 +52,31 @@ export default function HomeScreen({ navigation }: Props) {
   );
 
   return (
-    <Screen>
+    <Screen
+      headerAction={
+        isAuthenticated ? (
+          <AppButton
+            title="Sair"
+            variant="ghost"
+            size="sm"
+            onPress={() => void logout()}
+            style={styles.secondaryHeaderButton}
+            textStyle={styles.secondaryHeaderButtonText}
+          />
+        ) : (
+          <AppButton
+            title="Entrar"
+            variant="primary"
+            size="sm"
+            onPress={() => navigation.navigate('Login')}
+            style={styles.loginButton}
+          />
+        )
+      }
+    >
       <SectionHeader
-        eyebrow="SystemConnect"
         title="Publicações"
         subtitle="Encontre novidades, leia conteúdos completos e acompanhe o que importa."
-        action={
-          isAuthenticated ? (
-            <AppButton
-              title="Sair"
-              variant="ghost"
-              size="sm"
-              onPress={() => void logout()}
-              style={styles.secondaryHeaderButton}
-              textStyle={styles.secondaryHeaderButtonText}
-            />
-          ) : (
-            <AppButton
-              title="Entrar"
-              variant="primary"
-              size="sm"
-              onPress={() => navigation.navigate('Login')}
-              style={styles.loginButton}
-            />
-          )
-        }
       />
 
       <View style={[styles.heroCard, shadow(2)]}>
@@ -98,11 +98,7 @@ export default function HomeScreen({ navigation }: Props) {
         <View style={styles.metaRow}>
           <View style={styles.metaPill}>
             <Text style={styles.metaPillValue}>{posts.length}</Text>
-            <Text style={styles.metaPillLabel}>{debouncedSearch ? 'resultados' : 'itens'}</Text>
-          </View>
-          <View style={styles.metaPill}>
-            <Text style={styles.metaPillValue}>{debouncedSearch ? 'Busca ativa' : 'Catálogo'}</Text>
-            <Text style={styles.metaPillLabel}>navegação</Text>
+            <Text style={styles.metaPillLabel}>{debouncedSearch ? 'resultados' : 'publicações'}</Text>
           </View>
         </View>
       </View>

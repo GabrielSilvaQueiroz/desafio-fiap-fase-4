@@ -126,11 +126,10 @@ export default function UserFormScreen({ navigation, route }: Props) {
 
   if (!isAuthenticated) {
     return (
-      <Screen>
+      <Screen onBack={() => navigation.goBack()}>
         <SectionHeader
           title={`Cadastro de ${roleLabel}`}
           subtitle="Faça login para continuar."
-          onBack={() => navigation.goBack()}
         />
         <EmptyState
           title="Login necessário"
@@ -144,11 +143,10 @@ export default function UserFormScreen({ navigation, route }: Props) {
 
   if (!isTeacher) {
     return (
-      <Screen>
+      <Screen onBack={() => navigation.goBack()}>
         <SectionHeader
           title={`Cadastro de ${roleLabel}`}
           subtitle="Esta área não está disponível para a sua conta."
-          onBack={() => navigation.goBack()}
         />
         <EmptyState
           title="Acesso restrito"
@@ -161,12 +159,11 @@ export default function UserFormScreen({ navigation, route }: Props) {
   }
 
   return (
-    <Screen>
+    <Screen onBack={() => navigation.goBack()}>
       <SectionHeader
         eyebrow={mode === 'edit' ? 'Edição de cadastro' : 'Novo cadastro'}
         title={mode === 'edit' ? `Editar ${roleLabel}` : `Cadastrar ${roleLabel}`}
         subtitle="Preencha os dados abaixo para salvar o cadastro."
-        onBack={() => navigation.goBack()}
       />
 
       <View style={[styles.card, shadow(2)]}>
