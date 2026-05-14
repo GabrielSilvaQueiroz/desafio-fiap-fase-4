@@ -1,9 +1,11 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
+import { Ionicons } from '@expo/vector-icons';
 import AppButton from '../components/AppButton';
+import ConfirmModal from '../components/ConfirmModal';
 import EmptyState from '../components/EmptyState';
 import LoadingState from '../components/LoadingState';
 import Screen from '../components/Screen';
@@ -13,18 +15,21 @@ import { useAuth } from '../contexts/AuthContext';
 import { deletePost, listPosts } from '../services/posts';
 import { listUsers } from '../services/users';
 import type { Post, RootStackParamList } from '../types';
-import { formatDateLabel, getEntityTimestamp } from '../utils/date';
+import { formatDateLabel, getEntityTimestamp, getExcerpt } from '../utils/date';
 import { getErrorMessage } from '../utils/error';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AdminHome'>;
 
 export default function AdminHomeScreen({ navigation }: Props) {
-  const { loading: authLoading, isAuthenticated, isTeacher } = useAuth();
+  const { user, loading: authLoading, isAuthenticated, isTeacher } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [teacherCount, setTeacherCount] = useState(0);
   const [studentCount, setStudentCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [refreshError, setRefreshError] = useState('');
+  const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const loadDashboard = useCallback(async () => {
     setLoading(true);
@@ -56,30 +61,36 @@ export default function AdminHomeScreen({ navigation }: Props) {
     }, [isAuthenticated, isTeacher, loadDashboard])
   );
 
-  const handleDelete = useCallback(
-    (postId: string) => {
-      Alert.alert(
-        'Excluir post',
-        'Deseja remover esta publicação?',
-        [
-          { text: 'Cancelar', style: 'cancel' },
-          {
-            text: 'Excluir',
-            style: 'destructive',
-            onPress: async () => {
-              try {
-                await deletePost(postId);
-                await loadDashboard();
-              } catch (currentError) {
-                Alert.alert('Falha ao excluir', getErrorMessage(currentError));
-              }
-            },
-          },
-        ]
-      );
-    },
-    [loadDashboard]
-  );
+  useEffect(() => {
+    if (!deletingPostId) return;
+
+    deletePost(deletingPostId)
+      .then(() => loadDashboard())
+      .catch((currentError) => {
+        Alert.alert('Falha ao excluir', getErrorMessage(currentError));
+      })
+      .finally(() => {
+        setDeletingPostId(null);
+      });
+  }, [deletingPostId, loadDashboard]);
+
+  const handleDelete = useCallback((postId: string) => {
+    setPendingDeleteId(postId);
+    setConfirmVisible(true);
+  }, []);
+
+  const handleConfirmDelete = useCallback(() => {
+    setConfirmVisible(false);
+    if (pendingDeleteId) {
+      setDeletingPostId(pendingDeleteId);
+    }
+    setPendingDeleteId(null);
+  }, [pendingDeleteId]);
+
+  const handleCancelDelete = useCallback(() => {
+    setConfirmVisible(false);
+    setPendingDeleteId(null);
+  }, []);
 
   if (authLoading || loading) {
     return (
@@ -199,10 +210,15 @@ export default function AdminHomeScreen({ navigation }: Props) {
           <View style={styles.list}>
             {posts.map((post) => (
               <View key={post._id} style={[styles.postCard, shadow(1)]}>
-                <Text style={styles.postTitle}>{post.title}</Text>
-                <Text style={styles.postMeta}>
-                  {post.author_name} · {formatDateLabel(getEntityTimestamp(post))}
-                </Text>
+                <View style={styles.postHeader}>
+                  <View style={styles.authorBadge}>
+                    <Ionicons name="person" size={11} color={colors.accent} />
+                    <Text style={styles.authorBadgeText}>Professor {post.author_name}</Text>
+                  </View>
+                  <Text style={styles.postTitle}>{post.title}</Text>
+                </View>
+                <Text style={styles.postExcerpt}>{getExcerpt(post.content, 150)}</Text>
+                <Text style={styles.postDate}>{formatDateLabel(getEntityTimestamp(post))}</Text>
                 <View style={styles.postActions}>
                   <AppButton
                     title="Ver"
@@ -212,23 +228,37 @@ export default function AdminHomeScreen({ navigation }: Props) {
                     style={styles.cardGhostButton}
                     textStyle={styles.cardGhostButtonText}
                   />
-                  <AppButton
-                    title="Editar"
-                    size="sm"
-                    onPress={() => navigation.navigate('PostForm', { mode: 'edit', postId: post._id })}
-                  />
-                  <AppButton
-                    title="Excluir"
-                    size="sm"
-                    variant="danger"
-                    onPress={() => handleDelete(post._id)}
-                  />
+                  {user?._id === post.author_id ? (
+                    <AppButton
+                      title="Editar"
+                      size="sm"
+                      onPress={() => navigation.navigate('PostForm', { mode: 'edit', postId: post._id })}
+                    />
+                  ) : null}
+                  {user?._id === post.author_id ? (
+                    <AppButton
+                      title="Excluir"
+                      size="sm"
+                      variant="danger"
+                      loading={deletingPostId === post._id}
+                      disabled={deletingPostId !== null}
+                      onPress={() => handleDelete(post._id)}
+                    />
+                  ) : null}
                 </View>
               </View>
             ))}
           </View>
         )}
       </View>
+      <ConfirmModal
+        visible={confirmVisible}
+        title="Excluir post"
+        message="Deseja remover esta publicação permanentemente?"
+        confirmLabel="Excluir"
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
     </Screen>
   );
 }
@@ -292,17 +322,45 @@ const styles = StyleSheet.create({
     borderColor: colors.divider,
     borderRadius: radius.lg,
     borderWidth: 1,
-    gap: spacing.sm,
+    borderLeftWidth: 5,
+    borderLeftColor: colors.primary,
+    gap: spacing.md,
     padding: spacing.lg,
+  },
+  postHeader: {
+    gap: spacing.sm,
+  },
+  authorBadge: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(15, 45, 92, 0.08)',
+    borderColor: 'rgba(15, 45, 92, 0.18)',
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+  },
+  authorBadgeText: {
+    color: colors.accent,
+    fontSize: 12,
+    fontWeight: '700',
   },
   postTitle: {
     color: colors.text,
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '800',
+    lineHeight: 28,
   },
-  postMeta: {
+  postExcerpt: {
     color: colors.textMuted,
-    fontSize: 13,
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  postDate: {
+    color: colors.textMuted,
+    fontSize: 12,
     fontWeight: '600',
   },
   list: {
