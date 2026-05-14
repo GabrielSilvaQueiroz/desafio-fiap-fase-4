@@ -4,6 +4,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import { Ionicons } from '@expo/vector-icons';
 import AppButton from '../components/AppButton';
+import ConfirmModal from '../components/ConfirmModal';
 import EmptyState from '../components/EmptyState';
 import LoadingState from '../components/LoadingState';
 import Screen from '../components/Screen';
@@ -19,10 +20,12 @@ type Props = NativeStackScreenProps<RootStackParamList, 'PostDetail'>;
 
 export default function PostDetailScreen({ navigation, route }: Props) {
   const { postId } = route.params;
-  const { isTeacher } = useAuth();
+  const { user, isTeacher } = useAuth();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState(false);
+  const [confirmVisible, setConfirmVisible] = useState(false);
   const [error, setError] = useState('');
 
   const loadPost = useCallback(async () => {
@@ -43,29 +46,24 @@ export default function PostDetailScreen({ navigation, route }: Props) {
     void loadPost();
   }, [loadPost]);
 
-  const handleDelete = useCallback(async () => {
-    setSubmitting(true);
+  useEffect(() => {
+    if (!pendingDelete) return;
 
-    try {
-      await deletePost(postId);
-      navigation.navigate('AdminHome');
-    } catch (currentError) {
-      Alert.alert('Falha ao excluir', getErrorMessage(currentError));
-    } finally {
-      setSubmitting(false);
-    }
-  }, [navigation, postId]);
+    setSubmitting(true);
+    deletePost(postId)
+      .then(() => {
+        navigation.navigate('AdminHome');
+      })
+      .catch((currentError) => {
+        Alert.alert('Falha ao excluir', getErrorMessage(currentError));
+        setSubmitting(false);
+        setPendingDelete(false);
+      });
+  }, [pendingDelete, postId, navigation]);
 
   const confirmDelete = useCallback(() => {
-    Alert.alert(
-      'Excluir post',
-      'Esta ação remove o conteúdo permanentemente.',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Excluir', style: 'destructive', onPress: () => void handleDelete() },
-      ]
-    );
-  }, [handleDelete]);
+    setConfirmVisible(true);
+  }, []);
 
   if (loading) {
     return (
@@ -113,7 +111,7 @@ export default function PostDetailScreen({ navigation, route }: Props) {
         <Text style={styles.content}>{post.content}</Text>
       </View>
 
-      {isTeacher ? (
+      {isTeacher && user?._id === post.author_id ? (
         <View style={styles.actions}>
           <AppButton
             title="Editar Post"
@@ -127,6 +125,18 @@ export default function PostDetailScreen({ navigation, route }: Props) {
           />
         </View>
       ) : null}
+
+      <ConfirmModal
+        visible={confirmVisible}
+        title="Excluir post"
+        message="Esta ação remove o conteúdo permanentemente."
+        confirmLabel="Excluir"
+        onConfirm={() => {
+          setConfirmVisible(false);
+          setPendingDelete(true);
+        }}
+        onCancel={() => setConfirmVisible(false)}
+      />
     </Screen>
   );
 }
